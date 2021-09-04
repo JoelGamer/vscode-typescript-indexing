@@ -10,16 +10,25 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:typescript-indexing.helloWorld"
+				"onCommand:typescript-indexing.generateIndex"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "typescript-indexing.helloWorld",
-				"title": "Hello World"
+				"command": "typescript-indexing.generateIndex",
+				"title": "Generate Index"
 			}
-		]
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"command": "typescript-indexing.generateIndex",
+					"group": "typescript-indexing@1",
+					"when": "explorerResourceIsFolder == true"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "yarn run compile",
@@ -27,7 +36,7 @@
 		"watch": "tsc -watch -p ./",
 		"pretest": "yarn run compile && yarn run lint",
 		"lint": "eslint src --ext ts",
-		"test": "node ./out/test/runTest.js"
+		"test": "node ./out/__test__/runTest.js"
 	},
 	"devDependencies": {
 		"@types/vscode": "^1.59.0",
