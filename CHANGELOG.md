@@ -2,8 +2,10 @@
 
 All notable changes to the "typescript-indexing" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## [0.0.2]
 
-## [Unreleased]
+- Added index generation for deep-level folders
 
-- Initial release
+## [0.0.1]
+
+- Added index generation for single-level folders

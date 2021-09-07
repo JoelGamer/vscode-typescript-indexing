@@ -1,33 +1,44 @@
+import { writeFileSync } from "fs";
+import { ExtractedDirectory, ExtractedResult } from "../@types";
 import { exportRegexResult, exportUtils } from "../utils";
 import { exportConstruction } from "../utils/constructions-methods";
-import { ExtractorFileResult, ExtractorResult } from "./extractor";
 
-const hasMoreThanOneMethod = (results: ExtractorResult[]) => {
+const indexFile = (fsPath: string) => `${fsPath}/index.ts`;
+
+const hasMoreThanOneMethod = (results: ExtractedResult[]) => {
   const hasExportDefault = !!results.find((result) => result.method === 'exportDefault');
   const hasExport = !!results.find((result) => result.method === 'export');
 
   return hasExportDefault && hasExport;
 };
 
-const constructFile = (filesExport: ExtractorFileResult[]) => {
-  return filesExport.reduce<string>((fileContent, fileExport) => {
-    if (hasMoreThanOneMethod(fileExport.results)) {
-      fileContent += exportConstruction.asterisk.implementation(fileExport.file);
-    } else {
-      fileContent += fileExport.results.reduce<string>((results, result) => {
-        results += result.method === 'export'
-          ? exportConstruction.asterisk.implementation(fileExport.file)
-          : exportConstruction.defaultAs.implementation(
-            exportRegexResult(result.result, exportUtils[result.method].group), fileExport.file
-          );
+const deepFileConstruction = (directory: ExtractedDirectory) => {
+  let fileContent = '';
 
-        return results;
-      }, '');
+  directory.elements.map((element) => {
+    if ('elements' in element) {
+      deepFileConstruction(element);
+      fileContent += exportConstruction.asterisk.implementation(element.name);
+    } else {
+      if (hasMoreThanOneMethod(element.results)) {
+        fileContent += exportConstruction.asterisk.implementation(element.name);
+      } else {
+        fileContent += element.results.reduce<string>((results, result) => {
+          results += result.method === 'export'
+            ? exportConstruction.asterisk.implementation(element.name)
+            : exportConstruction.defaultAs.implementation(
+              exportRegexResult(result.result, exportUtils[result.method].group), element.name
+            );
+  
+          return results;
+        }, '');
+      }
     }
 
     fileContent += '\n';
-    return fileContent;
-  }, '');
+  });
+
+  writeFileSync(indexFile(directory.path), fileContent);
 };
 
-export default constructFile;
+export default deepFileConstruction;

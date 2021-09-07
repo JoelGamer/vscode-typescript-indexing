@@ -1,9 +1,20 @@
-import { lstatSync, readdirSync, writeFileSync } from 'fs';
+import { lstatSync } from 'fs';
 import { Uri, window } from 'vscode';
-import constructFile from './construct-file';
+import { readDirectory } from '../utils';
+import { Directory } from '../@types';
+import deepFileConstruction from './construct-file';
 import exportExtractor from './extractor';
 
-const indexFile = (fsPath: string) => `${fsPath}/index.ts`;
+const directoryDeepness = (directory: Directory) => {
+  return directory.elements.reduce<number>((deepness, element) => {
+    if ('elements' in element) {
+      directoryDeepness(element);
+      return deepness += 1;
+    }
+
+    return deepness;
+  }, 0);
+};
 
 const generateIndex = (target: Uri) => {
   if (!lstatSync(target.fsPath).isDirectory()){
@@ -11,18 +22,12 @@ const generateIndex = (target: Uri) => {
     return;
   }
   
-  const files = readdirSync(target.fsPath);
-
-  if (files.find((file) => file === 'index.ts')) {
-    window.showInformationMessage('There is already an index.ts on this directory');
-    return;
-  }
-
   try {
     window.showInformationMessage('Generating index.ts...');
-    const filesExport = exportExtractor(files, target.fsPath);
-    writeFileSync(indexFile(target.fsPath), constructFile(filesExport));
-    window.showInformationMessage(`Generated successfully index.ts on path ${target.fsPath}`);
+    const directory = readDirectory(target.fsPath);
+    const directoryExport = exportExtractor(directory);
+    deepFileConstruction(directoryExport);
+    window.showInformationMessage(`Generated successfully index.ts on path ${target.fsPath} of deepness: ${directoryDeepness(directory)}`);
   } catch (e) {
     window.showErrorMessage('A problem occurred when generating the index.ts file!');
     console.error(e);
