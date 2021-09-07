@@ -1,34 +1,38 @@
 import { readFileSync } from "fs";
 import { exportMethods, ExportTypes, exportUtils } from "../utils";
+import { Directory, ExtractedDirectory, ExtractedFile, ExtractedResult, File } from "../@types";
 
-const exportExtractor = (files: string[], fsPath: string): ExtractorFileResult[] => {
-  return files.map((file) => {
-    const content = readFileSync(`${fsPath}/${file}`);
+const deepExportExtractor = (directory: Directory): ExtractedDirectory => {
+  const extractedElements = directory.elements.map((element) => {
+    if ('elements' in element) {
+      return deepExportExtractor(element);
+    }
 
-    return {
-      file: file,
-      results: extractor(content.toString()),
-    };
+    return extractor(element);
   });
+
+  return {
+    ...directory,
+    elements: extractedElements,
+  };
 };
 
-const extractor = (content: string) => {
+const exportExtractor = (directory: Directory) => {
+  return deepExportExtractor(directory);
+};
+
+const extractor = (file: File): ExtractedFile => {
+  const content = readFileSync(file.path);
+
   const results = exportMethods.map((method) => ({
     method: method,
-    result: exportUtils[method].regex(content),
+    result: exportUtils[method].regex(content.toString()),
   }));
 
-  return results.filter((result) => result.result) as ExtractorResult[];
+  return {
+    ...file,
+    results: results.filter((result) => result.result) as ExtractedResult[],
+  };
 };
 
 export default exportExtractor;
-
-export interface ExtractorFileResult {
-  file: string;
-  results: ExtractorResult[];
-}
-
-export interface ExtractorResult {
-  method: ExportTypes;
-  result: RegExpExecArray;
-}
