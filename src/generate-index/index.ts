@@ -8,7 +8,7 @@ import exportExtractor from './extractor';
 const directoryDeepness = (directory: Directory) => {
   return directory.elements.reduce<number>((deepness, element) => {
     if ('elements' in element) {
-      directoryDeepness(element);
+      deepness += directoryDeepness(element);
       return deepness += 1;
     }
 
