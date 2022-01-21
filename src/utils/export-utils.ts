@@ -1,10 +1,10 @@
 export const exportUtils: ExportUtil = {
   export: {
-    regex: (content) => new RegExp('^export (?!default)(\\w+ \\w+)', 'gm').exec(content),
+    regex: (content) => new RegExp('^export (?!default)((\\w|\\s|{?)*)', 'gm').exec(content),
     group: 1,
   },
   exportDefault: {
-    regex: (content) => new RegExp('^export default (\\w+ \\w+|\\w+)', 'gm').exec(content),
+    regex: (content) => new RegExp('^export default ((\\w|\\s)*)', 'gm').exec(content),
     group: 1,
   },
   exportIndex: {
@@ -14,7 +14,7 @@ export const exportUtils: ExportUtil = {
 };
 
 export const exportRegexResult = (result: RegExpExecArray, methodGroup: number) => {
-  return result[methodGroup];
+  return result[methodGroup].trimEnd();
 };
 
 export const exportMethods = Object.keys(exportUtils) as ExportTypes[];

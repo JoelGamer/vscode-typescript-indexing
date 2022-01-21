@@ -2,6 +2,11 @@
 
 All notable changes to the "typescript-indexing" extension will be documented in this file.
 
+## [0.0.4]
+
+- Added support for default abstract classes
+- Added support for curly brackets exports
+
 ## [0.0.3]
 
 - Added icon;

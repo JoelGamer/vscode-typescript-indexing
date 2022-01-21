@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { exportMethods, ExportTypes, exportUtils } from "../utils";
+import { exportMethods, exportUtils } from "../utils";
 import { Directory, ExtractedDirectory, ExtractedFile, ExtractedResult, File } from "../@types";
 
 const deepExportExtractor = (directory: Directory): ExtractedDirectory => {
